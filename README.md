@@ -1,11 +1,12 @@
 # DGraph
   DGraph is a large-scale graph processing system.
+  
   It give you simple APIs and very fast computing speed.
+  
   It is based on SCC-DAG algorithm.
 
 ## Start Up
 ### Install
-
 ``` shell
 mkdir bin
 mkdir source
