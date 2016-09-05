@@ -28,11 +28,8 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
     
   Dataset format that DGraph support: 
     
-    (1) Adj-format:
+    (1) Adj-format: 
     
-      eg:
-      
-        
         0 232 3423 324
         1 100 234 232 3324
         2 324 45 65 2324
@@ -40,9 +37,6 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
         
     (2) Edge-list:
     
-      eg:
-      
-        
         0 232
         0 3423
         0 324
@@ -88,7 +82,7 @@ Run PageRank
 ``` shell
 ./bin/pagerank test test
 ```
-And you get result like
+And you get results like
 ``` shell
 Loading SCC DAG data...
 initialize vtxs data (vtxs num: 735322)
