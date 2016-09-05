@@ -32,17 +32,17 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
     
       eg:
       
-        ``` 
+        
         0 232 3423 324
         1 100 234 232 3324
         2 324 45 65 2324
         ...
-        ```
+        
     (2) Edge-list:
     
       eg:
       
-        ```
+        
         0 232
         0 3423
         0 324
@@ -50,7 +50,7 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
         1 234
         1 232
         ...
-        ```
+        
 
 2. Generate DGraph files
 ``` shell
