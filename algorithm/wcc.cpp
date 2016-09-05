@@ -19,7 +19,7 @@ public:
 		value = (int)(id);
 	}
 
-	bool update(ID virtual_id, typename App::bor_t inbor, typename App::bor_t outbor, cnt_t in_cnt, cnt_t out_cnt,
+	bool update(ID virtual_id, typename App::bor_t inbor, typename App::bor_t outbor, bor_cnt_t in_cnt, bor_cnt_t out_cnt,
 		 const typename App::values_t rvalue, typename App::values_t wvalue)
 	{
 		int val = rvalue[virtual_id];

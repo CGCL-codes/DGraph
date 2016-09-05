@@ -208,7 +208,8 @@ public:
 	}
 
 	void init(ID id, value_t &value){value = id;};
-	bool update(ID virtual_id, typename SccDagApp::bor_t inbor, typename SccDagApp::bor_t outbor, cnt_t in_cnt, cnt_t out_cnt,
+	bool update(ID virtual_id, typename SccDagApp::bor_t inbor, typename SccDagApp::bor_t outbor, 
+			bor_cnt_t in_cnt, bor_cnt_t out_cnt,
           const values_t rvalue, values_t wvalue){ return true;};
 	void reset(bool set_is_syn_not_asyn = true)
 	{

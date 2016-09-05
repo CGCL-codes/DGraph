@@ -5,6 +5,7 @@
 #include "type.h"
 #include <assert.h>
 
+
 using namespace std;
 
 template<class T>
@@ -61,7 +62,7 @@ private:
 	cnt_t max_size;
 	long unsigned int unit_size = sizeof(T), cnt_size = sizeof(T) > sizeof(cnt_t) ? sizeof(T) : sizeof(cnt_t);
 public:
-	VtxIndexFile(string dir, string name): MMapFile(dir, name), max_size(0){};
+	VtxIndexFile(string name, string dir): MMapFile(name, dir), max_size(0){};
 
 	Status open()
 	{
@@ -88,7 +89,14 @@ public:
 		addr_t addr = map_data(off);
 		return (*(T*)addr);
 	};
-		
+	
+	void set_size(cnt_t size)
+	{
+		if(size == 0)
+			return;
+		this[size - 1];
+	}
+
 	cnt_t size(){return max_size;};
 	ID *get_start(){return (ID*)(get_file_start() + cnt_size);}
 };
@@ -104,6 +112,7 @@ private:
 	int unit_size = sizeof(T);
 	//offset_t* &off_back_p = (offset_t*)get_file_start();
 	offset_t off_back = 0;
+	bool is_create_mode = false;
 public:
 	VtxBorFile(string dir, string name):MMapFile(dir, name){};
 
@@ -121,12 +130,16 @@ public:
 
 	Status close()
 	{
+		assert(!is_create_mode);
+
 		*(offset_t*)get_file_start() = off_back;
 		return MMapFile::close();
 	}
 
 	VtxUnit<T>* get_vtx(offset_t off) //Remenber to delete vu;
 	{
+		assert(!is_create_mode);
+
 		if(off == 0)
 			return ZeroUnit<T>::ZeroVtxUnit(ID(0) - 1);//return  max id that is not existed.
 
@@ -142,6 +155,8 @@ public:
 
 	addr_t get_vtx_base_addr(offset_t off)
 	{
+		assert(!is_create_mode);
+
 		if(off <= 0 || off >= off_back)
 			return NULL;
 		
@@ -151,6 +166,8 @@ public:
 
 	offset_t add_vtx(ID id, bor_cnt_t cnt)
 	{
+		assert(!is_create_mode);
+
 		offset_t off = off_back;
 		*(ID*)map_data(off, sizeof(ID)) = id;
 		*(bor_cnt_t*)map_data(off + sizeof(ID), sizeof(bor_cnt_t)) = cnt;
@@ -161,6 +178,8 @@ public:
 	//First, use add_vtx to set vertex, and use add_bor to add border.
 	Status add_bor(T unit)
 	{
+		assert(!is_create_mode);
+
 		T* data_p = (T*)map_data(off_back, sizeof(T));
 		if(data_p == NULL) return ERROR;
 
@@ -168,6 +187,66 @@ public:
 		off_back += unit_size;
 		return OK;
 	}
+
+/*
+ *	Create Mode is design for low memory. Write data to file directly instead of mmapping it in memory and writing.
+ */
+	OutFile *out_file;
+	offset_t out_off = sizeof(offset_t);
+	vector<T> out_bor;
+
+	Status create_start()
+	{
+		assert(!is_create_mode);
+
+		if(close() == ERROR) return ERROR;
+		
+		out_file = new OutFile(MMapFile::name, MMapFile::dir);
+		out_off = sizeof(offset_t);
+		is_create_mode = true;		
+		out_file->write_unit(out_off); //write offset space
+
+		return OK;
+	}
+
+	offset_t create_add_vtx_start(ID id)
+	{
+		assert(out_bor.size() == 0);
+
+		offset_t off = out_off;
+		out_file->write_unit(id);
+		out_off += sizeof(ID);
+		return off;
+	}
+
+	Status create_add_bor(T unit)
+	{
+		out_bor.push_back(unit);
+	}
+
+	Status create_add_vtx_end()
+	{
+		bor_cnt_t size = out_bor.size();
+		out_file->write_unit(size);
+		for(bor_cnt_t i = 0; i < size; i++)	
+			out_file->write_unit(out_bor[i]);
+
+		out_off += sizeof(bor_cnt_t) + size * sizeof(T);
+		out_bor.clear();
+		return OK;
+	}
+
+	Status create_end()
+	{
+		assert(is_create_mode);
+		out_file->close();
+		open();
+	    *(offset_t*)get_file_start() = out_off;
+		off_back = out_off;
+		is_create_mode = false;
+	    return OK;
+	}
+
 };
 
 template<class T = ID>
@@ -193,6 +272,11 @@ public:
 		if(index_file.close() == OK && bor_file.close() == OK)
 			return OK;
 		return ERROR;
+	}
+
+	Status destroy()
+	{
+		return index_file.destroy() && bor_file.destroy() ? OK : ERROR;
 	}
 
 	cnt_t size(){return index_file.size();}
@@ -224,11 +308,46 @@ public:
 		return OK;
 	}
 
+	Status set_max_id(ID id)
+	{
+		index_file[id]; //expand and set size atomatically
+		return OK;
+	}
+
 
 	//To quick access base addr of vtx
 	addr_t get_vtx_base_addr(ID id)
 	{
 		return bor_file.get_vtx_base_addr(index_file[id]);
+	}
+
+	Status create_start()
+	{
+		return bor_file.create_start();
+	};
+
+	Status create_add_vtx_start(ID id)
+	{
+		this_off = bor_file.create_add_vtx_start(id);
+		index_file[id] = this_off;
+		bor_cnt = 0;
+		return OK;
+	}
+
+	Status create_add_bor(T unit)
+	{
+		bor_cnt++;
+		return bor_file.create_add_bor(unit);
+	}
+
+	Status create_add_vtx_end()
+	{
+		return bor_file.create_add_vtx_end();
+	}
+
+	Status create_end()
+	{
+		return bor_file.create_end();
 	}
 
 };
@@ -264,7 +383,7 @@ public:
 		return ERROR;
 	}
 	
-	RawUnit<Ta, Tb> & operator [](ID raw_id) 
+	RawUnit<Ta, Tb> & operator [](cnt_t raw_id) 
 	{
 		assert(expand(sizeof(cnt_t) + (raw_id + 1) * (sizeof(Ta) + sizeof(Tb))) == OK);
 		
@@ -326,9 +445,8 @@ public:
 	}
 };
 
-
 template<class Ta, class Tb = Ta> //data type
-class OutRawFile : public OutFile
+class OutRawFile :  public OutFile
 {
 
 //Storage structure: [cnt_t size] [[a0], [b0]] [[a1], [b1]] ...
@@ -336,10 +454,14 @@ class OutRawFile : public OutFile
 private:
 	cnt_t raw_num;
 public:
-	OutRawFile(string name, string dir): OutFile(name, dir), raw_num(0){
+	OutRawFile(string name, string dir)
+		:OutFile(name, dir), raw_num(0)
+	{
 		//create a space for raw_num
 		write_unit(raw_num);
 	};
+
+	
 	
 	//template<class Ta, class Tb>
 	Status write_raw(Ta a, Tb b)

@@ -10,19 +10,29 @@ Status MMapFile::open(const char* mode)
 		return ERROR;
 	}
 	fd = fileno(fp);	
-	
+	/*
 	struct stat sb;
-	fstat(fd, &sb);	
+	if(fstat(fd, &sb) < 0)
+	{
+		perror("open: get fstat failed");
+		this->close();
+		return ERROR;
+	}	
 
 	flen = sb.st_size;
+	*/
+
+	FILE *p = fp;
+	fseek(p, 0L, SEEK_END);
+	flen = ftell(p);
+
 	if(flen == 0)
 	{
 		flen = BUFF_SIZE;
 		ftruncate(fd, flen);
 	}
-
 	fstart = (unsigned char*)mmap(NULL, flen, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	
+
 	if(fstart == MAP_FAILED)	
 	{
 		cout << "open: mmap file failed" << endl;
@@ -139,6 +149,8 @@ Status MMapFile::expand(offset_t off) //expand space to [0, off]
 
 Status MMapFile::close()
 {
+	if(!is_opened)
+		return OK;
 	munmap(fstart, flen);
 	fclose(fp);
 	is_opened = false;
@@ -150,8 +162,7 @@ Status MMapFile::close()
 
 Status MMapFile::destroy()
 {
-	close();
-	return remove(dir_name.c_str()) == 0 ? OK : ERROR;
+	return close() && (remove(dir_name.c_str()) == 0) ?  OK: ERROR;
 }
 
 /*
@@ -165,7 +176,7 @@ Status OutFile::write(const char* buff, size_t len)
 	{
 		offset_t remain = BUFF_SIZE - wp;
 		memcpy(buffer + wp, buff, remain);
-		fos.write(buffer, BUFF_SIZE);
+		::write(fos, buffer, BUFF_SIZE);
 		wp = 0;
 		len -= remain;
 		buff += remain;
@@ -174,7 +185,7 @@ Status OutFile::write(const char* buff, size_t len)
 		if(len > BUFF_SIZE)
 		{
 			remain = len - (len / BUFF_SIZE) * BUFF_SIZE;
-			fos.write(buff, len - remain);
+			::write(fos, buff, len - remain);
 			buff += (len - remain);
 			len = remain;
 		}
@@ -187,7 +198,8 @@ Status OutFile::write(const char* buff, size_t len)
 
 Status OutFile::flush()
 {
-	fos.write(buffer, wp);
+	if(::write(fos, buffer, wp) == -1)
+		return ERROR;
 	wp = 0;
 	return OK;
 }
@@ -196,7 +208,11 @@ Status OutFile::close()
 {
 	Status s = flush();
 	if(s != OK) return s;
-	fos.close();
+	if(::close(fos) == -1)
+	{
+		cout << "close OutFile " << dir_name << " failed." << endl;
+		return ERROR;
+	}
 	return OK;
 }
 

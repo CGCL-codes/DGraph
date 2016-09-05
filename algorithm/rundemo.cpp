@@ -15,8 +15,8 @@ public:
 		value = (long long)id;
 	}
 
-	bool update(ID virtual_id, typename SccDagApp::bor_t inbor, typename SccDagApp::bor_t outbor, cnt_t in_cnt, cnt_t out_cnt,
-		const values_t rvalue, values_t wvalue)
+	bool update(ID virtual_id, typename SccDagApp::bor_t inbor, typename SccDagApp::bor_t outbor, 
+			bor_cnt_t in_cnt, bor_cnt_t out_cnt, const values_t rvalue, values_t wvalue)
 	{
 		long long x = 0;
 		for(ID i = 0; i < in_cnt; i++)
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	cout << "serial run"; get_time(false);
 	Demo demo1(dir, to_dir);
 	demo1.reset();
-	demo1.serial_run(); 
+	demo1.normal_para_run(); 
 	get_time(); cout << endl;
 	demo1.print_top(10);
 //*/

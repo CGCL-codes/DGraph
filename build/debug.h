@@ -1,9 +1,16 @@
 #ifndef SCC_DAG_DEBUG_H
 #define SCC_DAG_DEBUG_H
 
+
+//#define DBG_UPDATE_NUM
+
+
 #include <iostream>
 #include <assert.h>
 #include <sys/time.h>
+#include <string>
+
+using namespace std;
 
 long long get_current_time()
 {
@@ -21,5 +28,16 @@ time_t get_time(bool isshow = true)
 	clock_time = now;
 	return now;
 }
+
+
+class DBG_print
+{
+public:
+	DBG_print(string s)
+	{
+		cout << "DBG: " << s << endl;
+	}
+};
+
 #endif
 

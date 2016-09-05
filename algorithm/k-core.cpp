@@ -20,14 +20,14 @@ public:
 	}
 
 	bool update(ID virtual_id, typename App::bor_t inbor, typename App::bor_t outbor,
-			cnt_t in_cnt, cnt_t out_cnt, const typename App::values_t rvalue, typename App::values_t wvalue)
+			bor_cnt_t in_cnt, bor_cnt_t out_cnt, const typename App::values_t rvalue, typename App::values_t wvalue)
 	{
 		int cnt = 0;
-		//*	
+		/*	
 		for(int i = 0; i < in_cnt; i++)
 				cnt += rvalue[inbor[i]];
 		//*/
-		/*
+		//*
 		ID idval = 0;
 		PG_Foreach(inbor, idval)
 			cnt += rvalue[idval];
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 {
         if (argc != 3 && argc != 4 && argc != 5)
         {
-                cout << "Usage ./k-core <data dir> <generate value to dir> <K(default 5)> <print top(default 10)>" << endl;
+                cout << "Usage ./k-core <data dir> <generate value to dir> <K(default 5)> <kc.nt top(default 10)>" << endl;
                 return 0;
         }
 
@@ -60,18 +60,33 @@ int main(int argc, char *argv[])
 		K = (argc >= 4 ? atoi(argv[3]) : 5);
 
 	string dir(argv[1]), to_dir(argv[2]);
-///*
+/*
 	cout << "normal para run" << endl; get_time(false);
 	KCore<UnSccDagApp<bool>> ukc(dir, to_dir, K);	
 	ukc.reset(false);
 	ukc.para_run();
 	get_time(); cout << endl;
-	ukc.print_top(top_num);
+	ukc.kc.nt_top(top_num);
 //*/
 	cout << "para run" << endl; get_time(false);
 	KCore<SccDagApp<bool>> kc(dir, to_dir, K);
+#if defined(SD_NORMAL_SYNC)
+	cout << "normal sync para run" << endl; get_time(false);
+	kc.reset();
+	kc.normal_para_run();
+#elif defined(SD_SYNC)
+	cout << "sync para run" << endl; get_time(false);
+	kc.reset();
+	kc.para_run();
+#elif defined(SD_NORMAL_ASYNC)
+	cout << "normal asyn para run" << endl; get_time(false);
+	kc.reset(false);
+	kc.normal_para_run();
+#else
+	cout << "asyn para run" << endl; get_time(false);
 	kc.reset(false);
 	kc.para_run();
+#endif
 	get_time(); cout << endl;
 	kc.print_top(top_num);
 

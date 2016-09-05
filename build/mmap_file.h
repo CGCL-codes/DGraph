@@ -31,7 +31,7 @@ protected:
 public:
 	string dir, name, dir_name;
 	
-	MMapFile(string &name, string &dir ): dir(dir), name(name), dir_name(dir + "/" + name), is_opened(false){};
+	MMapFile(string name, string dir ): dir(dir), name(name), dir_name(dir + "/" + name), is_opened(false){};
 
 	Status open(const char* mode = "a+");
 	Status write(offset_t start, offset_t len, const void* wbuffer);
@@ -51,17 +51,23 @@ public:
  * 	OutFile is consulted with PathGraph's class TempFile.
  *	Thank the authors of PathGraph.
  * */
-class OutFile{
+
+class OutFile 
+{
 protected:
-	ofstream fos;
+	int fos;
 	offset_t wp;
 	char buffer[BUFF_SIZE];
 public:
 	string dir, name, dir_name;
 	
-	OutFile(string name, string dir): dir(dir), name(name), dir_name(dir + "/" + name), 
-		fos((dir + "/" + name).c_str(), ios::out | ios::binary | ios::trunc),
-		wp(0){};
+	OutFile(string name, string dir):
+		dir(dir), name(name), dir_name(dir + "/" + name),
+		wp(0){
+			fos = open((dir + "/" + name).c_str(), 
+					O_WRONLY | O_CREAT | O_TRUNC, 
+					S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		};
 
 	Status write(const char* buff, size_t len);
 	Status flush();
@@ -74,7 +80,7 @@ public:
 		{
 			if(wp >= BUFF_SIZE)
 			{	
-				fos.write(buffer, wp);
+				::write(fos, buffer, wp);
 				wp = 0;
 			}
 			char c = static_cast<unsigned char> (unit & 0xff);

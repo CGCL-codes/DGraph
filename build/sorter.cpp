@@ -36,8 +36,23 @@ bool sort_raw_unit_comp21(SortRawUnit* &a, SortRawUnit* &b)
 	return a->ru.second < b->ru.second;
 }
 
-void merge_part1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(SortRawUnit* &, SortRawUnit* &))
+bool id_raw_comp12(const RawUnit<ID> &a, const RawUnit<ID> &b)
 {
+	if(a.first == b.first)
+		return a.second < b.second;
+	return a.first < b.first;
+}
+
+bool id_raw_comp21(const RawUnit<ID> &a, const RawUnit<ID> &b)
+{
+	if(a.second == b.second)
+		return a.first < b.first;
+	return a.second < b.second;
+}
+
+void merge_part1(RawFile<ID> &in_raw, OutRawFile<ID> &outfile, bool (*compare)(SortRawUnit* &, SortRawUnit* &))
+{
+
 	cout << "Enter merge part part_num: " << part_num << endl;
 	//Inistralize pque
 	UpdateTopHeap<SortRawUnit*> pque(compare);
@@ -54,8 +69,10 @@ void merge_part1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(Sort
 	{
 		SortRawUnit *sru = pque.top();	
 
-		RawUnit<ID> &ru = out_raw[line_cnt++];
-		ru = sru->ru;
+		//RawUnit<ID> &ru = out_raw[line_cnt++];
+		//ru = sru->ru;
+		line_cnt++;
+		outfile.write_raw(sru->ru.first, sru->ru.second);
 
 		if(nelems[sru->part_id] > 0)
 		{
@@ -71,11 +88,15 @@ void merge_part1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(Sort
 			delete sru;
 		}
 	}
-	out_raw.set_raw_num(line_cnt);
+	//out_raw.set_raw_num(line_cnt);
 }
 
 void Sorter::sort_raw1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_first, unsigned long long part_size)
 {
+	//In order to narrow memeory occupation, we use OutRawFile to write RawFile
+	out_raw.close();
+	OutRawFile<ID> outfile(out_raw.name, out_raw.dir);
+
 	cout << "big data sort" << endl;
 	//set part size
 	PART_SIZE = part_size;
@@ -84,7 +105,8 @@ void Sorter::sort_raw1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_fir
 	if(raw_size == 0)
 		return;
 
-	int (*compare)(const void*, const void*) = is_by_first ? (RawFile<ID>::vcompare12) : (RawFile<ID>::vcompare21);
+	//int (*compare)(const void*, const void*) = is_by_first ? (RawFile<ID>::vcompare12) : (RawFile<ID>::vcompare21);
+	bool (*compare)(const RawUnit<ID> &, const RawUnit<ID> &) = is_by_first ? (id_raw_comp12) : (id_raw_comp21);
 
 	part_num = (raw_size - 1)/ PART_SIZE + 1;
 
@@ -101,15 +123,17 @@ void Sorter::sort_raw1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_fir
 		    width = sizeof(RawUnit<ID>);
 		nelems[i] = nelem;
 
-		qsort(from, nelem, width, compare);
+		//qsort(from, nelem, width, compare);
+		sort((RawUnit<ID>*)from, (RawUnit<ID>*)from + nelem, compare);
 	}
 
 	cout << "Start merge part" << endl;
 	//Merge parts using heap.	
 	bool (*merge_cmp)(SortRawUnit* &, SortRawUnit* &) 
 			= is_by_first ? &sort_raw_unit_comp12 : &sort_raw_unit_comp21;
-	merge_part1(in_raw, out_raw, merge_cmp);
-
+	merge_part1(in_raw, outfile, merge_cmp);
+	outfile.close();
+	out_raw.open();
 /*
 	cout << "in_raw" << endl;
 	for(int i = 0; i < raw_size; i++)
@@ -123,9 +147,8 @@ void Sorter::sort_raw1(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_fir
 
 vector<unsigned long long> elems, froms_off;
 
-void merge_part2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(SortRawUnit* &, SortRawUnit* &), int tnum)
+void merge_part2(RawFile<ID> &in_raw, OutRawFile<ID> &outfile, bool (*compare)(SortRawUnit* &, SortRawUnit* &), int tnum)
 {
-	
 	cout << "Enter merge part part_num: " << tnum  << endl;
 	//Inistralize pque
 	UpdateTopHeap<SortRawUnit*> pque(compare);
@@ -142,8 +165,10 @@ void merge_part2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(Sort
 	{
 		SortRawUnit *sru = pque.top();	
 
-		RawUnit<ID> &ru = out_raw[line_cnt++];
-		ru = sru->ru;
+		//RawUnit<ID> &ru = out_raw[line_cnt++];
+		//ru = sru->ru;
+		line_cnt++;
+		outfile.write_raw(sru->ru.first, sru->ru.second);
 
 		if(elems[sru->part_id] > 0)
 		{
@@ -159,11 +184,14 @@ void merge_part2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool (*compare)(Sort
 			delete sru;
 		}
 	}
-	out_raw.set_raw_num(line_cnt);
 }
 
 void Sorter::sort_raw2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_first, int tnum)
 {
+	//In order to narrow memeory occupation, we use OutRawFile to write RawFile
+	out_raw.close();
+	string name = out_raw.name, dir = out_raw.dir;
+	OutRawFile<ID> outfile(name, dir);
 	long long raw_size = in_raw.size();
 	tnum = min(tnum, raw_size);
 
@@ -172,7 +200,8 @@ void Sorter::sort_raw2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_fir
 	if(raw_size == 0)
 		return;
 
-        int (*compare)(const void*, const void*) = is_by_first ? (RawFile<ID>::vcompare12) : (RawFile<ID>::vcompare21);
+    //int (*compare)(const void*, const void*) = is_by_first ? (RawFile<ID>::vcompare12) : (RawFile<ID>::vcompare21);
+	bool (*compare)(const RawUnit<ID> &, const RawUnit<ID> &) = is_by_first ? (id_raw_comp12) : (id_raw_comp21);
 
 	elems.clear();
 	froms_off.clear();
@@ -193,14 +222,21 @@ void Sorter::sort_raw2(RawFile<ID> &in_raw, RawFile<ID> &out_raw, bool is_by_fir
 
 	#pragma omp parallel for schedule(static)
 	for(int i = 0; i < tnum; i++)	
-		qsort((void*)(in_raw.begin() + froms_off[i]), elems[i], sizeof(RawUnit<ID>), compare);
+	{
+		RawUnit<ID> *begin = (RawUnit<ID>*)(in_raw.begin() + froms_off[i]),
+					*end = begin + elems[i];
+		sort(begin, end, compare);
+	}
+		//qsort((void*)(in_raw.begin() + froms_off[i]), elems[i], sizeof(RawUnit<ID>), compare);
 
 
 	cout << "Start merge part" << endl;
 	//Merge parts using heap.	
 	bool (*merge_cmp)(SortRawUnit* &, SortRawUnit* &) 
 			= is_by_first ? &sort_raw_unit_comp12 : &sort_raw_unit_comp21;
-	merge_part2(in_raw, out_raw, merge_cmp, tnum);
+	merge_part2(in_raw, outfile, merge_cmp, tnum);
+	outfile.close();
+	out_raw.open();
 }
 
 

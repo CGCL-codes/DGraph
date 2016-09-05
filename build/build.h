@@ -50,6 +50,7 @@ class SCC_Vtx
 public:
 	ID id, from_id, to_id;
 	vector<Vtx*> scc_group;
+	vector<ID> scc_group_id;
 	cnt_t outcnt;
 	ID* outbr;
 	SCC_Vtx(ID id): id(id), from_id(ID_NULL), to_id(ID_NULL), const_incnt(0), incnt(0){};
