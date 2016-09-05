@@ -195,7 +195,9 @@ To support SCC-DAG model, we have implemented a graph processing system, called 
 According to our SCC-DAG model, the DGraph has two stages, i.e., the preprocessing stage and the execution stage. In the preprocessing stage, it figures out SCCs, gets topological sorting and constructs sequential storage structure. In the execution stage, it executes different programs which are given by user according to different graph algorithms. The preprocessing stage is done only once to generate graph data files. After that, it is able to directly enter the execution stage to execute different graph algorithm as needed.
 
 <div align="center">
-<img src="doc/Framework.png" alt="Figure: The architecture of DGraph" />
+<img src="doc/Framework.png" />
+<br>
+Figure: The architecture of DGraph
 </div>
 
 The architecture of DGraph is depicted in Figure. It includes three modules. Upon hardware, there is a basic module, i.e., graph data module (GDM). It supplies efficient data access for out-of-core computing. Based on GDM, there are build module (BM) and calc module (CM). BM preprocesses the original graph dataset and generates compressed sequential storage structure. CM provides calc APIs for programmer to execute graph algorithm and automatically executes the graph algorithms in a parallel way. Programmer can implement different graph algorithm by invoking calc APIs.
@@ -204,7 +206,9 @@ The architecture of DGraph is depicted in Figure. It includes three modules. Upo
 The graph may be much larger than the memory size of a machine. In order to satisfy this requirement, DGraph is designed as an out-of-core computing system. It means that hard disk is leveraged to expand the size of memory. However, during the graph processing, data is frequently swapped between memory and hard disk and may induce low computing efficiency. As described in Section III-D2, SCC-DAG model has advantages in out-of-core computing. In this section, we introduce two optimizations to further increase its efficiency.
 
 <div align="center">
-<img src="doc/graph data struct.png" alt="Figure: Sequential Storage Structure" />
+<img src="doc/graph data struct.png"/>
+<br>
+Figure: Sequential Storage Structure
 </div>
 
 **Sequential Storage Structure.** In order to exploit the high sequential bandwidth, graph data is often expected to be accessed in a sequential way. Consequently, we design a sequential storage structure for DGraph as described in Figure. As the above discussed, the level is processed sequentially. Therefore, we can use level ID to locate the sequence of SCCs in this level. After that, we can locate the sequence of vertices of a SCC and locate the edge data of a vertex. In this way, all data can be sequentially stored
