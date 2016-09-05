@@ -8,12 +8,11 @@
 ## Start Up
 ### Install
 ``` shell
-mkdir DGraph
-cd DGraph
+mkdir WorkSpace
+cd WorkSpace
 mkdir bin
-mkdir source
-cd source
 git clone <DGraph git URL>
+cd DGraph
 make
 make install
 ```
@@ -57,7 +56,7 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
 
 2. Generate DGraph files
   ``` shell
-  cd DGraph
+  cd WorkSpace
   mkdir test
   ./bin/build.sh <dataset.txt> test
   ```
@@ -191,7 +190,7 @@ Just waiting for our paper publishment :)
 ### System Implementation
 To support SCC-DAG model, we have implemented a graph processing system, called DGraph1. It supports inmemory computing as well as out-of-core computing. In this section, we first give the architecture of DGraph, then discuss its details to support out-of-core computing.
 
-#### 1.System Architecture
+#### 1. System Architecture
 According to our SCC-DAG model, the DGraph has two stages, i.e., the preprocessing stage and the execution stage. In the preprocessing stage, it figures out SCCs, gets topological sorting and constructs sequential storage structure. In the execution stage, it executes different programs which are given by user according to different graph algorithms. The preprocessing stage is done only once to generate graph data files. After that, it is able to directly enter the execution stage to execute different graph algorithm as needed.
 
 <div align="center">
