@@ -115,11 +115,20 @@ Top value:
 ```
 
 ### Write a self-designed graph algorithm
-1. Write a derived class of base class ""
-2. Write Constructor(), init() and update() in derived template
+1. Include DGraph API: "api.h"
+1. Write a derived class of base class **SccDagAp**
+2. Write **Constructor()**, **init()** and **update()** in derived template
 
 Eg BFS:
 ``` cpp
+#include "api.h"
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cmath>
+#include <float.h>
+#include <limits.h>
+
 template <class App>
 class BFSApp : public App
 {
