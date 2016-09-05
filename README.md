@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
 ## DGraph Implementation
 ### Basic Algorithm: SCC-DAG execution model
-Just waiting for our paper published :)
+Just waiting for our paper publishment :)
 ### System Implementation
 To support SCC-DAG model, we have implemented a graph processing system, called DGraph1. It supports inmemory computing as well as out-of-core computing. In this section, we first give the architecture of DGraph, then discuss its details to support out-of-core computing.
 
@@ -201,6 +201,7 @@ Figure: The architecture of DGraph
 </div>
 
 
+
 The architecture of DGraph is depicted in Figure. It includes three modules. Upon hardware, there is a basic module, i.e., graph data module (GDM). It supplies efficient data access for out-of-core computing. Based on GDM, there are build module (BM) and calc module (CM). BM preprocesses the original graph dataset and generates compressed sequential storage structure. CM provides calc APIs for programmer to execute graph algorithm and automatically executes the graph algorithms in a parallel way. Programmer can implement different graph algorithm by invoking calc APIs.
 
 #### 2. Optimization for Out-of-core Computing
@@ -211,6 +212,7 @@ The graph may be much larger than the memory size of a machine. In order to sati
 <br>
 Figure: Sequential Storage Structure
 </div>
+
 
 
 **Sequential Storage Structure.** In order to exploit the high sequential bandwidth, graph data is often expected to be accessed in a sequential way. Consequently, we design a sequential storage structure for DGraph as described in Figure. As the above discussed, the level is processed sequentially. Therefore, we can use level ID to locate the sequence of SCCs in this level. After that, we can locate the sequence of vertices of a SCC and locate the edge data of a vertex. In this way, all data can be sequentially stored
