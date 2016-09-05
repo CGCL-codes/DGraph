@@ -1,9 +1,9 @@
 # DGraph
   DGraph is a large-scale graph processing system.
   
-  It gives you simple APIs and very fast computing speed.
+  * It gives you simple APIs and very fast computing speed.
   
-  Its core algorithm is SCC-DAG execution model.
+  * Its core algorithm is SCC-DAG execution model.
 
 ## Start Up
 ### Install
