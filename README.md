@@ -116,7 +116,7 @@ Top value:
 
 ### Write a self-designed graph algorithm
 1. Include DGraph API: **"api.h"**
-1. Write a derived class of base class **SccDagAp**
+1. Write a derived class of base class **SccDagApp**
 2. Write **Constructor()**, **init()** and **update()** in derived template
 
 Eg BFS:
