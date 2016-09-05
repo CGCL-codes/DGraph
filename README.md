@@ -23,10 +23,15 @@ After install, the execute files are in bin dir
 First, we need to generate DGraph files(preprocessing) from a certain original graph dataset. After that, we can run many algortihm on the DGraph files.
 #### Preprocessing graph dataset
 1. Prepare a dataset
+
     You can get dataset from [SNAP](http://snap.stanford.edu/data/)
+    
     Dataset format that DGraph support: 
+    
     (1) Adj-format:
+    
       eg:
+      
         ``` 
         0 232 3423 324
         1 100 234 232 3324
@@ -34,7 +39,9 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
         ...
         ```
     (2) Edge-list:
+    
       eg:
+      
         ```
         0 232
         0 3423
@@ -49,9 +56,11 @@ First, we need to generate DGraph files(preprocessing) from a certain original g
 ``` shell
 cd DGraph
 mkdir test
-./bin/build <dataset.txt> test
+./bin/build.sh <dataset.txt> test
 ```
+
 And this dataset's DGraph files are:
+
 ```
 ls
 ```
