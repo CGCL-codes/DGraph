@@ -229,4 +229,6 @@ and is allow to be sequentially accessed.
 **Data Compressing.** To reduce the number of I/O operations, we compress the edge data to reduce the total volume of the graph. Because the edge data are sequentially stored and the data are integers, we use Base 128 Varints algorithm to compress. It is a sequential integer compress algorithm. The length of compress data is related to the digital size of number. The smaller the number be, the shorter the length of compress data is. Thus, we sort the edge ID of each vertex, and only compress the delta-value between an edge ID and next edge ID. Data compress brings some extra overhead. But to big graph, the benefits of reducing swap operation is more than the extra overhead.
 
 ## Support or Contact
-DGraph is developed in the [HUST SCTS&CGCL Lab]!(http://grid.hust.edu.cn/). If you are interested in trying out DGraph in your machine, please contact Yu Zhang(zhyu@hust.edu.cn). You are also welcomed to commit or fork your modification for support in the project's page in github.
+DGraph is developed in the ![HUST SCTS&CGCL Lab](http://grid.hust.edu.cn/). 
+If you have any questions, please contact Yu Zhang(zhyu@hust.edu.cn). 
+We welcome you to commit your modification to support our project.
